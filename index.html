@@ -1,1 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>天麗2026母親節特惠計算機</title>
 
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#111827" />
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f3f4f6;
+      --text:#111827;
+      --muted:#6b7280;
+
+      /* 商品區（亮色） */
+      --p-card:#ffffff;
+      --p-border:rgba(17,24,39,.10);
+
+      /* 統計區（深色，跟商品區明顯區隔） */
+      --s-bg:#0b1220;
+      --s-card:rgba(255,255,255,.08);
+      --s-border:rgba(255,255,255,.12);
+      --s-text:#f9fafb;
+      --s-muted:rgba(249,250,251,.75);
+
+      --primary:#2563eb;
+      --success:#16a34a;
+      --line:#06c755;
+    }
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .wrapper{
+      display:flex;
+      min-height:100vh;
+    }
+
+    /* 商品區 */
+    .products{
+      flex:1;
+      padding:18px 16px 24px;
+      background:var(--bg);
+    }
+    .products h2{
+      margin:6px 0 12px;
+      font-size:18px;
+    }
+
+    .product-card{
+      background:var(--p-card);
+      border:1px solid var(--p-border);
+      padding:12px;
+      margin-bottom:10px;
+      border-radius:14px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.05);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+
+    .product-info{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:0;
+    }
+    .product-name{
+      font-weight:800;
+      font-size:14px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .product-meta{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .product-card button{
+      background:var(--primary);
+      border:none;
+      color:white;
+      padding:8px 12px;
+      border-radius:10px;
+      font-weight:800;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .actions{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .btn{
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:12px;
+      color:white;
+      font-weight:900;
+      font-size:16px;
+      cursor:pointer;
+    }
+    .btn-success{ background:var(--success); }
+    .btn-line{ background:var(--line); }
+
+    .hint{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+
+    /* 統計區（深色） */
+    .summary{
+      width:340px;
+      background:linear-gradient(180deg,var(--s-bg), #0a1020);
+      color:var(--s-text);
+      padding:16px 14px;
+      position:sticky;
+      top:0;
+      height:100vh;
+      box-shadow:-10px 0 30px rgba(0,0,0,0.18);
+    }
+
+    .summary h3{
+      margin:6px 0 12px;
+      font-size:18px;
+      letter-spacing:.5px;
+    }
+
+    .stat-box{
+      background:var(--s-card);
+      border:1px solid var(--s-border);
+      padding:12px;
+      border-radius:14px;
+      margin-bottom:10px;
+      line-height:1.55;
+    }
+
+    .stat-title{
+      font-size:12px;
+      color:var(--s-muted);
+      margin-bottom:6px;
+      font-weight:900;
+      letter-spacing:.4px;
+    }
+
+    .member-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-top:8px;
+    }
+
+    .member-btn{
+      padding:10px 8px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(255,255,255,.10);
+      color:var(--s-text);
+      cursor:pointer;
+      font-size:12px;
+      font-weight:900;
+    }
+
+    .member-btn.active{
+      background:rgba(37,99,235,.95);
+      border:1px solid rgba(37,99,235,.95);
+      color:white;
+    }
+
+    .mono{
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum";
+    }
+
+    .gift-lines{
+      font-size:13px;
+      line-height:1.55;
+      white-space:pre-line;
+    }
+
+    /* 手機版 */
+    @media(max-width:768px){
+      .wrapper{ flex-direction:column; }
+      .summary{
+        width:100%;
+        height:auto;
+        position:fixed;
+        bottom:0;
+        left:0;
+        border-radius:18px 18px 0 0;
+        box-shadow:0 -10px 30px rgba(0,0,0,0.25);
+        z-index:999;
+      }
+      .products{ padding-bottom:320px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="products">
+      <h2>🛍 商品選擇</h2>
+      <div id="productList"></div>
+
+      <div class="actions">
+        <button class="btn btn-success" onclick="generateImage()">產生訂單圖片</button>
+        <button class="btn btn-line" onclick="shareLine()">分享到 LINE</button>
+      </div>
+
+      <div class="hint">
+        若你更新後仍看不到商品，通常是 Service Worker 快取舊檔。請到 iPhone：設定 → Safari → 進階 → 網站資料 → 搜尋 github.io → 刪除後再開。
+      </div>
+    </div>
+
+    <div class="summary">
+      <h3>📊 即時統計</h3>
+
+      <div class="stat-box">
+        <div class="stat-title">會員等級</div>
+        <div class="member-grid" id="memberGrid"></div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-title">金額 / PV</div>
+        <div class="mono">
+          目前總金額：<strong>NT$ <span id="totalAmount">0</span></strong><br/>
+          目前總PV：<strong><span id="totalPV">0</span></strong>
+        </div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-title">回饋金（依扣除後 PV 計算）</div>
+        <div class="mono"><strong><span id="cashback">0</span></strong></div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-title">贈品內容（目前可得）</div>
+        <div class="gift-lines" id="giftContent">尚未達標</div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-title">加碼建議（目前 / 升級後）</div>
+        <div class="gift-lines" id="giftSuggestion">-</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // 會員
+  const members = [
+    {name:"新會員", rate:0,    fee:1000, deduct:28001},
+    {name:"專員",   rate:0.25, fee:500},
+    {name:"主任",   rate:0.30, fee:500},
+    {name:"經理",   rate:0.35, fee:500},
+    {name:"寶石",   rate:0.37, fee:500},
+    {name:"鑽石",   rate:0.38, fee:500},
+    {name:"金鑽",   rate:0.39, fee:500},
+    {name:"顧問",   rate:0.40, fee:500},
+    {name:"舊會員", rate:0.25, fee:500},
+  ];
+
+  let selectedMember = members[0];
+  let totalAmount = 0;
+  let totalPV = 0;
+
+  // 商品
+  const products = [
+    {name:"A1深層潔膚油",price:1995,pv:1700},
+    {name:"1號 雙效潔顏露",price:1995,pv:1700},
+    {name:"2號 平衡柔膚露",price:1995,pv:1700},
+    {name:"3號 全效緊緻眼霜",price:3990,pv:3500},
+    {name:"4號 煥白晶華霜",price:4200,pv:3600},
+    {name:"5號 均衡調理霜",price:4200,pv:3600},
+    {name:"6A 亮白防護霜",price:3990,pv:3500},
+    {name:"6B 潤白防護霜",price:3990,pv:3500},
+    {name:"8號 賦活晶華霜",price:3990,pv:3500},
+    {name:"9號 保濕修護霜",price:2415,pv:1800},
+    {name:"10號 C液",price:3465,pv:3000},
+    {name:"12號 煥采青春露",price:2415,pv:1800},
+    {name:"Bio雪肌面膜",price:2415,pv:1800},
+    {name:"C粉/瓶",price:3465,pv:3000},
+    {name:"C粉/10瓶/盒",price:29400,pv:26000},
+    {name:"青春元素-F",price:1995,pv:1700},
+    {name:"青春元素-L",price:1995,pv:1700},
+    {name:"纖麗365第2代",price:2625,pv:2300},
+    {name:"纖麗365 S1",price:2625,pv:2300},
+    {name:"橄欖油",price:3210,pv:2400},
+    {name:"紅參精華飲",price:3210,pv:2400},
+    {name:"麗穩康",price:3210,pv:2200},
+    {name:"麗穩膳",price:3210,pv:2200},
+  ];
+
+  // 贈品規則：用「扣除後PV」effectivePV 判斷（新會員先扣 28001）
+  const giftRules = [
+    {pv:200000, items:["50,000 天麗幣","天麗隨行杯 2個","天麗萬用保養包","C粉 1瓶"]},
+    {pv:100000, items:["20,000 天麗幣","天麗隨行杯 1個","天麗萬用保養包"]},
+    {pv:50000,  items:["6A ×1","9號 ×1","12號 ×1"]},
+    {pv:32000,  items:["1號 ×1","9號 ×1"]},
+    {pv:19000,  items:["2號 ×1"]},
+  ];
+
+  function fmtGift(items){ return items.join("、"); }
+
+  function renderProducts(){
+    const el = document.getElementById("productList");
+    let html = "";
+    products.forEach(p=>{
+      html += `
+        <div class="product-card">
+          <div class="product-info">
+            <div class="product-name">${p.name}</div>
+            <div class="product-meta">價格 NT$ ${p.price}　/　PV ${p.pv}</div>
+          </div>
+          <button type="button" onclick="addProduct(${p.price},${p.pv})">加入</button>
+        </div>
+      `;
+    });
+    el.innerHTML = html;
+  }
+
+  function renderMembers(){
+    const grid = document.getElementById("memberGrid");
+    let html = "";
+    members.forEach((m,i)=>{
+      html += `<button type="button" class="member-btn" onclick="selectMember(${i})">${m.name}</button>`;
+    });
+    grid.innerHTML = html;
+    highlightMember();
+  }
+
+  function highlightMember(){
+    document.querySelectorAll(".member-btn").forEach((btn,i)=>{
+      btn.classList.toggle("active", members[i] === selectedMember);
+    });
+  }
+
+  function selectMember(i){
+    selectedMember = members[i];
+    highlightMember();
+    calculate();
+  }
+
+  function addProduct(price,pv){
+    totalAmount += price;
+    totalPV += pv;
+    calculate();
+  }
+
+  function calculate(){
+    // 扣除後PV（新會員扣 28001）
+    let effectivePV = totalPV;
+    if(selectedMember.deduct){
+      effectivePV = totalPV - selectedMember.deduct;
+      if(effectivePV < 0) effectivePV = 0;
+    }
+
+    // 回饋金（依扣除後PV）
+    const cashback = Math.floor(effectivePV * selectedMember.rate);
+
+    document.getElementById("totalAmount").innerText = totalAmount;
+    document.getElementById("totalPV").innerText = totalPV;
+    document.getElementById("cashback").innerText = cashback;
+
+    // 目前可得（找最高檔）
+    let currentRule = null;
+    for(const rule of giftRules){
+      if(effectivePV >= rule.pv){
+        currentRule = rule;
+        break;
+      }
+    }
+    const currentGiftText = currentRule ? fmtGift(currentRule.items) : "尚未達標";
+    document.getElementById("giftContent").innerText = currentGiftText;
+
+    // 下一檔（找最接近的更高門檻）
+    const bigger = giftRules.filter(r => effectivePV < r.pv).sort((a,b)=>a.pv-b.pv);
+    const nextRule = bigger.length ? bigger[0] : null;
+
+    let suggestion = "";
+    if(!nextRule){
+      suggestion = `目前可得：${currentGiftText}\n✅ 已達最高檔贈品門檻`;
+    }else{
+      const needPV = nextRule.pv - effectivePV;
+      suggestion =
+        `目前可得：${currentGiftText}\n` +
+        `再加 ${needPV} PV（達 ${nextRule.pv} PV）即可升級為：${fmtGift(nextRule.items)}`;
+    }
+    document.getElementById("giftSuggestion").innerText = suggestion;
+  }
+
+  function generateImage(){
+    html2canvas(document.body).then(canvas=>{
+      const link = document.createElement("a");
+      link.download = "order.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  }
+
+  function shareLine(){
+    window.open("https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(location.href));
+  }
+
+  // 初始化
+  renderProducts();
+  renderMembers();
+  calculate();
+</script>
+
+<!-- SW 註冊 -->
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", async () => {
+      try{
+        const reg = await navigator.serviceWorker.register("./service-worker.js");
+        console.log("SW Registered:", reg.scope);
+      }catch(err){
+        console.error("SW register failed:", err);
+      }
+    });
+  }
+</script>
+</body>
+</html>
