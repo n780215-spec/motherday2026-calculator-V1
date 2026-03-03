@@ -1,0 +1,22 @@
+{
+  "name": "天麗2026母親節特惠計算機",
+  "short_name": "天麗PV",
+  "start_url": "/motherday2026-calculator-V1/",
+  "scope": "/motherday2026-calculator-V1/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#111827",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
