@@ -1,0 +1,9 @@
+{
+  "name": "天麗2026母親節特惠計算機",
+  "short_name": "天麗計算機",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f4f6",
+  "theme_color": "#111827"
+}
