@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>天麗母親節計算機</title>
+
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#111827">
+
+<style>
+:root{
+  --bg:#f3f4f6;
+  --card:#fff;
+  --border:rgba(0,0,0,.08);
+  --primary:#2563eb;
+
+  /* 分區色 */
+  --skincare-bg: rgba(37,99,235,.08);
+  --skincare-border: rgba(37,99,235,.14);
+  --nutrition-bg: rgba(22,163,74,.10);
+  --nutrition-border: rgba(22,163,74,.18);
+
+  /* 右側即時欄 */
+  --s-bg:#0b1220;
+  --s-card:rgba(255,255,255,.08);
+  --s-text:#fff;
+  --s-muted:rgba(255,255,255,.72);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  background:var(--bg);
+  font-size:16px;
+}
+
+.wrapper{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+}
+
+/* 左側 */
+.products{flex:1;padding:16px}
+
+/* 會員 */
+.member-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-bottom:12px;
+}
+.member-btn{
+  padding:10px 8px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:#fff;
+  font-weight:900;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.member-btn.active{
+  background:var(--primary);
+  color:#fff;
+  border-color:var(--primary);
+}
+
+/* 分區標題 */
+.section{
+  border-radius:14px;
+  padding:12px;
+  margin:12px 0;
+  border:1px solid var(--border);
+  background:#fff;
+}
+.section-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:1000;
+  margin:0 0 10px 0;
+}
+.badge{
+  display:inline-flex;
+  align-items:center;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  border:1px solid var(--border);
+}
+.badge.skincare{ background:var(--skincare-bg); border-color:var(--skincare-border); color:#1e3a8a; }
+.badge.nutrition{ background:var(--nutrition-bg); border-color:var(--nutrition-border); color:#14532d; }
+
+.product-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.product-card.skincare{
+  border-color: var(--skincare-border);
+  background: linear-gradient(0deg, rgba(37,99,235,.03), rgba(37,99,235,.03)), #fff;
+}
+.product-card.nutrition{
+  border-color: var(--nutrition-border);
+  background: linear-gradient(0deg, rgba(22,163,74,.03), rgba(22,163,74,.03)), #fff;
+}
+
+.product-info{min-width:0}
+.product-name{font-weight:1000;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-meta{font-size:13px;color:#666;margin-top:4px}
+
+.qty-controls{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.qty-btn{
+  width:42px;height:42px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#fff;
+  font-size:20px;
+  font-weight:1000;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.qty-btn.plus{
+  background:var(--primary);
+  color:white;
+  border-color:var(--primary);
+}
+.qty-num{
+  min-width:32px;
+  text-align:center;
+  font-weight:1000;
+  font-variant-numeric: tabular-nums;
+}
+
+.detail-box{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px;
+  margin-top:16px;
+}
+.detail-box h3{margin:0 0 10px 0}
+.detail-box h4{margin:14px 0 8px 0}
+ul{padding-left:18px;margin:8px 0}
+
+/* 右側：縮小 + 內部可滾動 + sticky */
+.summary{
+  width:250px;                 /* ✅ 縮小一些 */
+  background:var(--s-bg);
+  color:var(--s-text);
+  border-radius:16px;
+  padding:12px;
+  position:sticky;
+  top:12px;
+  max-height:calc(100vh - 24px); /* ✅ 不佔滿整頁 */
+  overflow:auto;                /* ✅ 內容多就自己滾 */
+  box-shadow:0 18px 40px rgba(0,0,0,.22);
+}
+
+.summary h3{
+  margin:6px 0 12px;
+  font-size:16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.sbox{
+  background:var(--s-card);
+  border:1px solid rgba(255,255,255,.10);
+  padding:10px;
+  border-radius:12px;
+  margin-bottom:10px;
+}
+.sbox h4{
+  margin:0 0 8px 0;
+  font-size:13px;
+  color:var(--s-muted);
+  font-weight:900;
+}
+.big{font-size:18px;font-weight:1000}
+.small{font-size:13px;color:var(--s-muted);line-height:1.5}
+
+/* 手機：右側欄改成固定右側窄欄（不遮內容） */
+@media(max-width:768px){
+  .summary{
+    width:190px;
+    top:10px;
+  }
+  .products{ padding-right:4px; }
+}
+</style>
+</head>
+
+<body>
+<div class="wrapper">
+
+  <div class="products">
+    <h2>會員等級</h2>
+    <div class="member-grid" id="memberGrid"></div>
+
+    <!-- 保養品區 -->
+    <div class="section">
+      <div class="section-title">
+        <span class="badge skincare">保養品</span>
+        <span>（A1 深層潔膚油 ～ C粉）</span>
+      </div>
+      <div id="skincareList"></div>
+    </div>
+
+    <!-- 營養品區 -->
+    <div class="section">
+      <div class="section-title">
+        <span class="badge nutrition">營養品</span>
+        <span>（青春元素-F ～ 麗穩膳）</span>
+      </div>
+      <div id="nutritionList"></div>
+    </div>
+
+    <div class="detail-box">
+      <h3>完整明細</h3>
+      <p>會員等級：<strong id="detailMember"></strong></p>
+      <p>會員費：NT$ <strong id="detailFee"></strong></p>
+      <p>商品金額：NT$ <strong id="detailAmount"></strong></p>
+      <p>總PV：<strong id="detailPV"></strong></p>
+
+      <h4>已選商品（種類＋數量）</h4>
+      <ul id="detailItems"></ul>
+
+      <h4>贈品明細（PV門檻＋買8送1）</h4>
+      <ul id="detailGifts"></ul>
+
+      <p>回饋金：NT$ <strong id="detailCashback"></strong></p>
+    </div>
+  </div>
+
+  <div class="summary">
+    <h3>📊 即時統計</h3>
+
+    <div class="sbox">
+      <h4>商品金額（不含會員費）</h4>
+      <div class="big">NT$ <span id="sumAmount">0</span></div>
+    </div>
+
+    <div class="sbox">
+      <h4>總PV</h4>
+      <div class="big"><span id="sumPV">0</span></div>
+      <div class="small">（贈品門檻依「商品總PV」判定）</div>
+    </div>
+
+    <div class="sbox">
+      <h4>升級建議（還差多少 PV 到下一檔）</h4>
+      <div id="sumUpgrade">請加入商品</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ===== 會員（舊會員=專員~顧問，不另設舊會員）=====
+const members = [
+  {name:"新會員", fee:1000, deduct:28001, rate:0.25},
+  {name:"專員", fee:500, rate:0.25},
+  {name:"主任", fee:500, rate:0.30},
+  {name:"經理", fee:500, rate:0.35},
+  {name:"寶石", fee:500, rate:0.37},
+  {name:"鑽石", fee:500, rate:0.38},
+  {name:"金鑽", fee:500, rate:0.39},
+  {name:"顧問", fee:500, rate:0.40}
+];
+let selectedMember = members[1]; // 預設專員
+
+// ===== 你的完整產品清單（保留不吃掉）=====
+const products = [
+  {name:"A1深層潔膚油",price:1995,pv:1700, category:"skincare"},
+  {name:"1號 雙效潔顏露",price:1995,pv:1700, category:"skincare"},
+  {name:"2號 平衡柔膚露",price:1995,pv:1700, category:"skincare"},
+  {name:"3號 全效緊緻眼霜",price:3990,pv:3500, category:"skincare"},
+  {name:"4號 煥白晶華霜",price:4200,pv:3600, category:"skincare"},
+  {name:"5號 均衡調理霜",price:4200,pv:3600, category:"skincare"},
+  {name:"6A 亮白防護霜",price:3990,pv:3500, category:"skincare"},
+  {name:"6B 潤白防護霜",price:3990,pv:3500, category:"skincare"},
+  {name:"8號 賦活晶華霜",price:3990,pv:3500, category:"skincare"},
+  {name:"9號 保濕修護霜",price:2415,pv:1800, category:"skincare"},
+  {name:"10號 C液",price:3465,pv:3000, category:"skincare"},
+  {name:"12號 煥采青春露",price:2415,pv:1800, category:"skincare"},
+  {name:"Bio雪肌面膜",price:2415,pv:1800, category:"skincare"},
+  {name:"C粉/瓶",price:3465,pv:3000, category:"skincare"},
+  {name:"C粉/10瓶/盒",price:29400,pv:26000, category:"skincare"},
+
+  {name:"青春元素-F",price:1995,pv:1700, category:"nutrition"},
+  {name:"青春元素-L",price:1995,pv:1700, category:"nutrition"},
+  {name:"纖麗365第2代",price:2625,pv:2300, category:"nutrition"},
+  {name:"纖麗365 S1",price:2625,pv:2300, category:"nutrition"},
+  {name:"橄欖油",price:3210,pv:2400, category:"nutrition"},
+  {name:"紅參精華飲",price:3210,pv:2400, category:"nutrition"},
+  {name:"麗穩康",price:3210,pv:2200, category:"nutrition"},
+  {name:"麗穩膳",price:3210,pv:2200, category:"nutrition"}
+];
+
+// ===== 買8送1（營養品保健）=====
+const buy8 = new Set([
+  "青春元素-F","青春元素-L",
+  "纖麗365第2代","纖麗365 S1",
+  "橄欖油","紅參精華飲",
+  "麗穩康","麗穩膳"
+]);
+
+// ===== 贈品門檻（由小到大，避免跳級）=====
+const giftRules = [
+  {pv:19000,  items:["2號 ×1"]},
+  {pv:32000,  items:["1號 ×1","9號 ×1"]},
+  {pv:50000,  items:["6A ×1","9號 ×1","12號 ×1"]},
+  {pv:100000, items:["20,000 天麗幣","隨行杯 1個","萬用包"]},
+  {pv:200000, items:["50,000 天麗幣","隨行杯 2個","萬用包","C粉 1瓶"]}
+];
+
+// qty
+const qtyMap = {};
+function getQty(i){ return qtyMap[i] || 0; }
+function setQty(i,v){ if(v<=0) delete qtyMap[i]; else qtyMap[i]=v; }
+
+function renderMembers(){
+  const grid = document.getElementById("memberGrid");
+  grid.innerHTML = "";
+  members.forEach((m,i)=>{
+    const btn = document.createElement("button");
+    btn.className = "member-btn" + (m===selectedMember ? " active" : "");
+    btn.type = "button";
+    btn.textContent = m.name;
+    btn.onclick = ()=>{ selectedMember=m; renderMembers(); calculate(); };
+    grid.appendChild(btn);
+  });
+}
+
+function createProductCard(p, idx){
+  const card = document.createElement("div");
+  card.className = `product-card ${p.category}`;
+
+  const info = document.createElement("div");
+  info.className = "product-info";
+  info.innerHTML = `
+    <div class="product-name">${p.name}</div>
+    <div class="product-meta">價格 NT$ ${p.price} / PV ${p.pv}</div>
+  `;
+
+  const controls = document.createElement("div");
+  controls.className = "qty-controls";
+
+  const minus = document.createElement("button");
+  minus.className = "qty-btn";
+  minus.type = "button";
+  minus.textContent = "−";
+  minus.onclick = ()=>changeQty(idx, -1);
+
+  const num = document.createElement("div");
+  num.className = "qty-num";
+  num.id = `qty-${idx}`;
+  num.textContent = String(getQty(idx));
+
+  const plus = document.createElement("button");
+  plus.className = "qty-btn plus";
+  plus.type = "button";
+  plus.textContent = "+";
+  plus.onclick = ()=>changeQty(idx, +1);
+
+  controls.append(minus, num, plus);
+  card.append(info, controls);
+  return card;
+}
+
+function renderProducts(){
+  const skincareList = document.getElementById("skincareList");
+  const nutritionList = document.getElementById("nutritionList");
+  skincareList.innerHTML = "";
+  nutritionList.innerHTML = "";
+
+  products.forEach((p, idx)=>{
+    const card = createProductCard(p, idx);
+    if(p.category === "skincare") skincareList.appendChild(card);
+    else nutritionList.appendChild(card);
+  });
+}
+
+function changeQty(i, delta){
+  setQty(i, getQty(i)+delta);
+  // 更新單一數量顯示（不用整頁重繪也可，但此處簡單重算）
+  const el = document.getElementById(`qty-${i}`);
+  if(el) el.textContent = String(getQty(i));
+  calculate();
+}
+
+function calcTotals(){
+  let amount=0, pv=0;
+  const items=[];
+  products.forEach((p,i)=>{
+    const q=getQty(i);
+    if(q>0){
+      amount += p.price*q;
+      pv += p.pv*q;
+      items.push(`${p.name} ×${q}`);
+    }
+  });
+  return {amount, pv, items};
+}
+
+function getCurrentGiftByPV(pv){
+  let current = null;
+  for(const rule of giftRules){
+    if(pv >= rule.pv) current = rule;
+    else break;
+  }
+  return current;
+}
+function getNextGiftByPV(pv){
+  for(const rule of giftRules){
+    if(pv < rule.pv) return rule;
+  }
+  return null;
+}
+
+function calcBuy8Gifts(){
+  const lines=[];
+  products.forEach((p,i)=>{
+    const q=getQty(i);
+    if(q>0 && buy8.has(p.name)){
+      const bonus = Math.floor(q/8);
+      if(bonus>0) lines.push(`${p.name} +${bonus}`);
+    }
+  });
+  return lines;
+}
+
+function calculate(){
+  const {amount, pv, items} = calcTotals();
+
+  // 右側極簡
+  document.getElementById("sumAmount").textContent = amount;
+  document.getElementById("sumPV").textContent = pv;
+
+  const next = getNextGiftByPV(pv);
+  let upgradeText = "已達最高門檻 ✅";
+  if(pv===0){
+    upgradeText = "請加入商品";
+  }else if(next){
+    upgradeText = `還差 ${next.pv - pv} PV → ${next.items.join("、")}`;
+  }
+  document.getElementById("sumUpgrade").textContent = upgradeText;
+
+  // 明細
+  document.getElementById("detailMember").textContent = selectedMember.name;
+  document.getElementById("detailFee").textContent = selectedMember.fee;
+  document.getElementById("detailAmount").textContent = amount;
+  document.getElementById("detailPV").textContent = pv;
+
+  // 回饋金：新會員扣28001後用25%；其他用各自%
+  const effectivePV = selectedMember.deduct ? Math.max(0, pv - selectedMember.deduct) : pv;
+  const cashback = Math.floor(effectivePV * selectedMember.rate);
+  document.getElementById("detailCashback").textContent = cashback;
+
+  // 已選商品清單
+  const ulItems = document.getElementById("detailItems");
+  ulItems.innerHTML = "";
+  if(items.length===0){
+    ulItems.innerHTML = "<li>尚未選購</li>";
+  }else{
+    items.forEach(t=> ulItems.innerHTML += `<li>${t}</li>`);
+  }
+
+  // 贈品明細
+  const ulGifts = document.getElementById("detailGifts");
+  ulGifts.innerHTML = "";
+  const giftLines = [];
+
+  // PV門檻贈品
+  const current = getCurrentGiftByPV(pv);
+  if(current) giftLines.push(...current.items);
+  else giftLines.push("尚未達標");
+
+  // 買8送1
+  const b8 = calcBuy8Gifts();
+  if(b8.length>0){
+    giftLines.push("—");
+    giftLines.push("加贈（保健品買8送1）");
+    b8.forEach(x=>giftLines.push(x));
+  }
+
+  giftLines.forEach(g=> ulGifts.innerHTML += `<li>${g}</li>`);
+}
+
+renderMembers();
+renderProducts();
+calculate();
+</script>
+</body>
+</html>
